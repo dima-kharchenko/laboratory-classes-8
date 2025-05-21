@@ -4,7 +4,7 @@ const { getDatabase } = require("../database");
 const COLLECTION_NAME = "carts";
 
 class Cart {
-  constructor() {}
+  constructor() { }
 
   static async getCart() {
     const db = getDatabase();
@@ -25,19 +25,19 @@ class Cart {
     }
   }
 
-  static async add(productName) {
+  static async add(product) {
     const db = getDatabase();
 
     try {
       const product = await Product.findByName(productName);
 
-      if (!product) {
-        throw Error(`Product '${productName}' not found`);
+       if (!product || !product.name || !product.price) {
+        throw Error("Product not found");
       }
 
       const cart = await this.getCart();
       const searchedProduct = cart.items.find(
-        (item) => item.product.name === productName
+        (item) => item.product.name === product.name
       );
 
       if (searchedProduct) {
@@ -111,6 +111,20 @@ class Cart {
         .updateOne({}, { $set: { items: [] } });
     } catch (error) {
       console.error("Error occurred while clearing cart");
+    }
+  }
+
+  static async deleteProductByName(product_name) {
+    const db = getDatabase();
+
+    try {
+      const { items } = await this.getCart();
+
+      const filteredItems = items.filter((item) => item.product.name !== product_name);
+
+      await db.collection(COLLECTION_NAME).updateOne({}, { $set: { items: filteredItems } });
+    } catch (err) {
+      console.error(err);
     }
   }
 }

@@ -9,6 +9,7 @@ const productsRoutes = require("./routing/products");
 const logoutRoutes = require("./routing/logout");
 const killRoutes = require("./routing/kill");
 const homeRoutes = require("./routing/home");
+const cartRoutes = require("./routing/cart");
 const { STATUS_CODE } = require("./constants/statusCode");
 const { MENU_LINKS } = require("./constants/navigation");
 const cartController = require("./controllers/cartController");
@@ -18,6 +19,7 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", "views");
 
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -27,11 +29,12 @@ app.use((request, _response, next) => {
   logger.getInfoLog(url, method);
   next();
 });
-
 app.use("/products", productsRoutes);
 app.use("/logout", logoutRoutes);
 app.use("/kill", killRoutes);
+app.use("/cart", cartRoutes);
 app.use(homeRoutes);
+
 app.use((request, response) => {
   const { url } = request;
   const cartCount = cartController.getProductsCount();
